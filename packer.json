@@ -1,5 +1,5 @@
 {
-    "_comment" : "Create a AWS AMI ith AMZ Linux 2018 with Java and Tomcat",
+    "_comment" : "Create a AWS AMI ith AMI Ubuntu with Java and Tomcat",
     "variables": {
       "aws_access_key": "",
       "aws_secret_key": "",
@@ -23,7 +23,7 @@
       "vpc_id": "{{user `vpc_id`}}",
       "subnet_id": "{{user `subnet_id`}}",
       "tags": {
-        "Name": "Saikiran-Pinapathruni-Build-{{isotime | clean_resource_name}}"
+        "Name": "BharathRak-Build-{{isotime | clean_resource_name}}"
       }
     }],
     "provisioners": [{
@@ -33,7 +33,7 @@
         "sudo apt update -y",
         "sudo apt install nginx -y",
         "sudo apt install git -y",
-        "sudo git clone https://github.com/saikiranpi/webhooktesting.git",
+        "sudo git clone https://github.com/bharathrak/webhooktesting.git",
         "sudo rm -rf /var/www/html/index.nginx-debian.html",
         "sudo cp webhooktesting/index.html /var/www/html/index.nginx-debian.html",
         "sudo cp webhooktesting/style.css /var/www/html/style.css",
