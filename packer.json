@@ -7,66 +7,59 @@ packer {
   }
 }
 
-{
-  "_comment": "Create an AWS AMI with Ubuntu, Java, Tomcat, and additional configurations",
-  
-  "variables": {
-    "aws_access_key": "",
-    "aws_secret_key": "",
-    "region": "",
-    "source_ami": "",
-    "instance_type": "",
-    "vpc_id": "",
-    "subnet_id": ""
-  },
+variable "aws_access_key" {}
+variable "aws_secret_key" {}
+variable "region" {}
+variable "source_ami" {}
+variable "instance_type" {}
+variable "vpc_id" {}
+variable "subnet_id" {}
 
-  "builders": [{
-    "type": "amazon-ebs",
-    "access_key": "{{user `aws_access_key`}}",
-    "secret_key": "{{user `aws_secret_key`}}",
-    "region": "{{user `region`}}",
-    "source_ami": "{{user `source_ami`}}",
-    "instance_type": "{{user `instance_type`}}",
-    "ssh_username": "ubuntu",
-    "ami_name": "BharathRak-Build-{{isotime | clean_resource_name}}",
-    "vpc_id": "{{user `vpc_id`}}",
-    "subnet_id": "{{user `subnet_id`}}",
-    "tags": {
-      "Name": "BharathRak-Build-{{isotime | clean_resource_name}}"
-    }
-  }],
-
-  "provisioners": [
-    {
-      "type": "shell",
-      "inline": [
-        "sleep 30",
-        "sudo apt update -y",
-        "sudo apt install -y nginx git",
-        "sudo git clone https://github.com/bharathrak/webhooktesting.git",
-        "sudo rm -rf /var/www/html/index.nginx-debian.html",
-        "sudo cp webhooktesting/index.html /var/www/html/index.nginx-debian.html",
-        "sudo cp webhooktesting/style.css /var/www/html/style.css",
-        "sudo cp webhooktesting/scorekeeper.js /var/www/html/scorekeeper.js",
-        "sudo systemctl start nginx",
-        "sudo systemctl enable nginx",
-        "curl -fsSL https://get.docker.com | bash"
-      ]
-    },
-    {
-      "type": "file",
-      "source": "docker.service",
-      "destination": "/tmp/docker.service"
-    },
-    {
-      "type": "shell",
-      "inline": [
-        "sudo cp /tmp/docker.service /lib/systemd/system/docker.service",
-        "sudo usermod -aG docker ubuntu",
-        "sudo systemctl daemon-reload",
-        "sudo systemctl restart docker"
-      ]
-    }
-  ]
+source "amazon-ebs" "example" {
+  access_key    = var.aws_access_key
+  secret_key    = var.aws_secret_key
+  region        = var.region
+  source_ami    = var.source_ami
+  instance_type = var.instance_type
+  ssh_username  = "ubuntu"
+  ami_name      = "Saikiran-Pinapathruni-Build-${timestamp()}"
+  vpc_id        = var.vpc_id
+  subnet_id     = var.subnet_id
+  tags = {
+    Name = "BharathRak-Build-${timestamp()}"
+  }
 }
 
+build {
+  sources = ["source.amazon-ebs.example"]
+
+  provisioner "shell" {
+    inline = [
+      "sleep 30",
+      "sudo apt update -y",
+      "sudo apt install -y nginx git",
+      "sudo git clone https://github.com/bharathrak/webhooktesting.git",
+      "sudo rm -rf /var/www/html/index.nginx-debian.html",
+      "sudo cp webhooktesting/index.html /var/www/html/index.nginx-debian.html",
+      "sudo cp webhooktesting/style.css /var/www/html/style.css",
+      "sudo cp webhooktesting/scorekeeper.js /var/www/html/scorekeeper.js",
+      "sudo systemctl start nginx",
+      "sudo systemctl enable nginx",
+      "curl -fsSL https://get.docker.com | bash"
+    ]
+  }
+
+  provisioner "file" {
+    source      = "docker.service"
+    destination = "/tmp/docker.service"
+  }
+
+  provisioner "shell" {
+    inline = [
+      "sudo cp /tmp/docker.service /lib/systemd/system/docker.service",
+      "sudo usermod -aG docker ubuntu",
+      "sudo systemctl daemon-reload",
+      "sudo systemctl restart docker"
+    ]
+  }
+}
